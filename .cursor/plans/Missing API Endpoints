@@ -1,0 +1,36 @@
+# Missing API Endpoints Analysis
+
+## Overview
+Based on comparing frontend API calls with existing backend routes, here are the missing endpoints that need to be implemented.
+
+## Words API Endpoints
+For managing vocabulary words and their associated data:
+
+- [ ] `GET /words` - For fetching paginated words list
+- [ ] `GET /words/{wordId}` - For fetching word details
+
+## Groups API Endpoints
+For handling word groupings and collections:
+
+- [ ] `GET /groups` - For fetching paginated groups
+- [ ] `GET /groups/{groupId}` - For fetching group details
+- [ ] `GET /groups/{groupId}/words` - For fetching words in a group
+- [ ] `GET /groups/{groupId}/study_sessions` - For fetching group study sessions
+
+## Study Sessions API Endpoints
+For managing learning sessions and progress tracking:
+
+- [ ] `GET /study_sessions` - For fetching paginated study sessions
+- [ ] `GET /study_sessions/{sessionId}` - For fetching session details
+- [ ] `POST /study_sessions/{sessionId}/review` - For submitting session reviews
+
+## Dashboard API Endpoints
+For displaying user progress and statistics:
+
+- [ ] `GET /dashboard/recent-session` - For fetching recent study session
+- [ ] `GET /dashboard/stats` - For fetching study statistics
+
+## Priority Assessment
+The most critical missing endpoints appear to be the Words API endpoints and most of the Groups API endpoints, as they're core to the application's functionality.
+Let me know if you would like implementations for any of these specific endpoints.
+

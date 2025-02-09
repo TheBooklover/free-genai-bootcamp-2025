@@ -2,8 +2,8 @@ from flask import Flask, g
 from flask_cors import CORS
 
 from lib.db import Db
+from routes.words import words_bp
 
-import routes.words
 import routes.groups
 import routes.study_sessions
 import routes.dashboard
@@ -63,11 +63,13 @@ def create_app(test_config=None):
         app.db.close()
 
     # load routes -----------
-    routes.words.load(app)
     routes.groups.load(app)
     routes.study_sessions.load(app)
     routes.dashboard.load(app)
     routes.study_activities.load(app)
+    
+    # Register blueprints
+    app.register_blueprint(words_bp, url_prefix='/words')
     
     return app
 
