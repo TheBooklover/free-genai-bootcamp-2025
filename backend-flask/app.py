@@ -69,7 +69,7 @@ def create_app(test_config=None):
     routes.study_activities.load(app)
     
     # Register blueprints
-    app.register_blueprint(words_bp, url_prefix='/words')
+    app.register_blueprint(words_bp, url_prefix='/api')
     
     return app
 

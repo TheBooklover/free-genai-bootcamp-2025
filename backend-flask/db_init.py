@@ -11,4 +11,4 @@ def init_db():
     db.close()
 
 if __name__ == '__main__':
-    init_db() 
+    init_db()

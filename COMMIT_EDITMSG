@@ -1,0 +1,4 @@
+docs: mark GET /words endpoint as completed
+
+Updated Missing API Endpoints document to reflect that the GET /words endpoint 
+has been fully implemented with pagination, sorting, and filtering support. 

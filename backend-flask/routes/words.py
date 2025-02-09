@@ -2,12 +2,34 @@ from flask import Blueprint, request, jsonify, g
 from flask_cors import cross_origin
 import json
 from typing import Dict, Any
+from db import get_db
 
 words_bp = Blueprint('words', __name__)
 
+@words_bp.route('/words', methods=['GET'])
+def get_words():
+    try:
+        # TODO: Implement pagination, sorting, and filtering
+        db = get_db()
+        cursor = db.cursor()
+        
+        # Basic query to get all words - will be enhanced later
+        cursor.execute('SELECT * FROM words')
+        words = cursor.fetchall()
+        
+        return jsonify({
+            'words': words,
+            'page': 1,
+            'total_pages': 1,
+            'total_items': len(words)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @words_bp.route('', methods=['GET'])
 @cross_origin()
-def get_words():
+def get_words_with_pagination():
     """
     Get a paginated list of Québécois French words with optional sorting and filtering.
     

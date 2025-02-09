@@ -6,7 +6,10 @@ Based on comparing frontend API calls with existing backend routes, here are the
 ## Words API Endpoints
 For managing vocabulary words and their associated data:
 
-- [ ] `GET /words` - For fetching paginated words list
+- [x] `GET /words` - For fetching paginated words list
+  - Paginated list of all words
+  - Supports sorting and filtering
+  - Returns word details and metadata
 - [ ] `GET /words/{wordId}` - For fetching word details
 
 ## Groups API Endpoints
