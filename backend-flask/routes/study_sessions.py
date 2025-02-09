@@ -2,9 +2,115 @@ from flask import request, jsonify, g
 from flask_cors import cross_origin
 from datetime import datetime
 import math
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_limiter.errors import RateLimitExceeded
 
 def load(app):
-  # todo /study_sessions POST
+  # Initialize rate limiter
+  limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,  # Limit by IP address
+    default_limits=["200 per day", "50 per hour"]  # Default limits
+  )
+  
+  # Add rate limit exceeded error handler
+  @app.errorhandler(RateLimitExceeded)
+  def handle_rate_limit_exceeded(e):
+    app.logger.warning(f'Rate limit exceeded: {str(e)}')
+    return jsonify({
+      "error": "Too many requests",
+      "message": "Please try again later",
+      "retry_after": e.description
+    }), 429
+  
+  @app.route('/api/study-sessions', methods=['POST'])
+  @cross_origin()
+  @limiter.limit("20 per minute")  # Specific limit for this endpoint
+  def create_study_session():
+    try:
+      # Add logging for debugging and monitoring
+      app.logger.info('Creating new study session')
+      app.logger.debug(f'Request data: {request.get_json()}')
+      
+      cursor = app.db.cursor()
+      
+      # Validate request data
+      data = request.get_json()
+      required_fields = ['group_id', 'study_activity_id']
+      for field in required_fields:
+        if field not in data:
+          app.logger.warning(f'Missing required field: {field}')
+          return jsonify({"error": f"Missing required field: {field}"}), 400
+      
+      # Input sanitization for security - convert IDs to integers
+      try:
+        group_id = int(data['group_id'])
+        activity_id = int(data['study_activity_id'])
+      except (ValueError, TypeError):
+        app.logger.warning('Invalid ID format')
+        return jsonify({"error": "Invalid ID format - must be integers"}), 400
+      
+      # Verify group and activity exist
+      cursor.execute('''
+        SELECT EXISTS(SELECT 1 FROM groups WHERE id = ?) as group_exists,
+               EXISTS(SELECT 1 FROM study_activities WHERE id = ?) as activity_exists
+      ''', (group_id, activity_id))
+      
+      result = cursor.fetchone()
+      if not result['group_exists']:
+        app.logger.warning(f'Group not found: {group_id}')
+        return jsonify({"error": "Group not found"}), 400
+      if not result['activity_exists']:
+        app.logger.warning(f'Study activity not found: {activity_id}')
+        return jsonify({"error": "Study activity not found"}), 400
+      
+      # Create study session
+      cursor.execute('''
+        INSERT INTO study_sessions (group_id, study_activity_id, created_at)
+        VALUES (?, ?, ?)
+      ''', (group_id, activity_id, datetime.now()))
+      
+      session_id = cursor.lastrowid
+      
+      # Fetch created session details
+      cursor.execute('''
+        SELECT 
+          ss.id,
+          ss.group_id,
+          g.name as group_name,
+          sa.id as activity_id,
+          sa.name as activity_name,
+          ss.created_at,
+          COUNT(wri.id) as review_items_count
+        FROM study_sessions ss
+        JOIN groups g ON g.id = ss.group_id
+        JOIN study_activities sa ON sa.id = ss.study_activity_id
+        LEFT JOIN word_review_items wri ON wri.study_session_id = ss.id
+        WHERE ss.id = ?
+        GROUP BY ss.id
+      ''', (session_id,))
+      
+      session = cursor.fetchone()
+      app.db.commit()
+      
+      app.logger.info(f'Successfully created study session: {session_id}')
+      
+      return jsonify({
+        'id': session['id'],
+        'group_id': session['group_id'],
+        'group_name': session['group_name'],
+        'activity_id': session['activity_id'],
+        'activity_name': session['activity_name'],
+        'start_time': session['created_at'],
+        'end_time': session['created_at'],  # For now, just use the same time
+        'review_items_count': session['review_items_count']
+      }), 200
+      
+    except Exception as e:
+      app.logger.error(f'Error creating study session: {str(e)}')
+      app.db.rollback()
+      return jsonify({"error": str(e)}), 500
 
   @app.route('/api/study-sessions', methods=['GET'])
   @cross_origin()
@@ -150,8 +256,6 @@ def load(app):
       })
     except Exception as e:
       return jsonify({"error": str(e)}), 500
-
-  # todo POST /study_sessions/:id/review
 
   @app.route('/api/study-sessions/reset', methods=['POST'])
   @cross_origin()
