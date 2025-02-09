@@ -600,5 +600,40 @@
       { "kanji": "偉", "romaji": ["e","ra"] },
       { "kanji": "い", "romaji": ["i"] }
     ]
+  },
+  {
+    "quebecois": "tanné",
+    "standard_french": "fatigué/en avoir marre",
+    "english": "fed up/tired of",
+    "pronunciation": "tane",
+    "usage_notes": "Very common expression of frustration. Ex: 'J'suis tanné de l'hiver' (I'm fed up with winter)"
+  },
+  {
+    "quebecois": "écœurant",
+    "standard_french": "extraordinaire",
+    "english": "amazing/awesome",
+    "pronunciation": "ekœʁɑ̃",
+    "usage_notes": "In Quebec, often used positively to mean 'amazing', unlike in France where it means 'disgusting'"
+  },
+  {
+    "quebecois": "frileux",
+    "standard_french": "sensible au froid",
+    "english": "sensitive to cold",
+    "pronunciation": "fʁilø",
+    "usage_notes": "Particularly useful in Quebec's cold climate. Ex: 'Je suis frileuse, je mets ma tuque'"
+  },
+  {
+    "quebecois": "mouillé",
+    "standard_french": "trempé",
+    "english": "wet/soaked",
+    "pronunciation": "muje",
+    "usage_notes": "More common than 'trempé' in Quebec. Used in the expression 'mouillé comme une lavette' (soaked through)"
+  },
+  {
+    "quebecois": "ben",
+    "standard_french": "très/beaucoup",
+    "english": "very/really",
+    "pronunciation": "bɛ̃",
+    "usage_notes": "Used as an intensifier. Ex: 'C'est ben beau' (It's really nice). Often combined: 'ben ben' (really really)"
   }
 ]
