@@ -24,9 +24,23 @@ def load(app):
       "retry_after": e.description
     }), 429
   
+  def validate_study_session_request(data):
+    required_fields = ['group_id', 'study_activity_id']
+    for field in required_fields:
+        if field not in data:
+            return False, f"Missing required field: {field}"
+            
+    try:
+        int(data['group_id'])
+        int(data['study_activity_id'])
+    except (ValueError, TypeError):
+        return False, "Invalid ID format - must be integers"
+        
+    return True, None
+
   @app.route('/api/study-sessions', methods=['POST'])
   @cross_origin()
-  @limiter.limit("20 per minute")  # Specific limit for this endpoint
+  @limiter.limit("20 per minute")
   def create_study_session():
     try:
       # Add logging for debugging and monitoring
@@ -37,11 +51,10 @@ def load(app):
       
       # Validate request data
       data = request.get_json()
-      required_fields = ['group_id', 'study_activity_id']
-      for field in required_fields:
-        if field not in data:
-          app.logger.warning(f'Missing required field: {field}')
-          return jsonify({"error": f"Missing required field: {field}"}), 400
+      is_valid, error_message = validate_study_session_request(data)
+      if not is_valid:
+        app.logger.warning(f'Validation failed: {error_message}')
+        return jsonify({"error": error_message}), 400
       
       # Input sanitization for security - convert IDs to integers
       try:
@@ -256,6 +269,114 @@ def load(app):
       })
     except Exception as e:
       return jsonify({"error": str(e)}), 500
+
+  def validate_review_request(data):
+    """
+    Validates the review submission request data.
+    Returns (is_valid, error_message) tuple.
+    """
+    if not data:
+        return False, "Missing request data"
+        
+    if 'reviews' not in data:
+        return False, "Missing reviews array"
+        
+    if not isinstance(data['reviews'], list):
+        return False, "reviews must be an array"
+        
+    for review in data['reviews']:
+        if 'word_id' not in review:
+            return False, "Missing word_id in review"
+            
+        if 'correct' not in review:
+            return False, "Missing correct field in review"
+            
+        if not isinstance(review['correct'], bool):
+            return False, "correct field must be a boolean"
+            
+        try:
+            int(review['word_id'])
+        except (ValueError, TypeError):
+            return False, "word_id must be an integer"
+            
+    return True, None
+
+  @app.route('/api/study-sessions/<int:session_id>/review', methods=['POST'])
+  @cross_origin()
+  @limiter.limit("20 per minute")
+  def submit_session_review(session_id):
+    try:
+        cursor = app.db.cursor()
+        
+        # Validate request data
+        data = request.get_json()
+        is_valid, error_message = validate_review_request(data)
+        if not is_valid:
+            return jsonify({"error": error_message}), 400
+            
+        # Verify session exists
+        cursor.execute('''
+            SELECT EXISTS(SELECT 1 FROM study_sessions WHERE id = ?) as session_exists
+        ''', (session_id,))
+        
+        if not cursor.fetchone()['session_exists']:
+            return jsonify({"error": "Study session not found"}), 404
+            
+        # Process each review
+        reviews_data = []
+        for review in data['reviews']:
+            # Verify word exists
+            cursor.execute('''
+                SELECT EXISTS(SELECT 1 FROM words WHERE id = ?) as word_exists
+            ''', (review['word_id'],))
+            
+            if not cursor.fetchone()['word_exists']:
+                return jsonify({"error": f"Word {review['word_id']} not found"}), 404
+                
+            # Insert review
+            cursor.execute('''
+                INSERT INTO word_review_items (
+                    study_session_id,
+                    word_id,
+                    correct,
+                    reviewed_at
+                ) VALUES (?, ?, ?, ?)
+            ''', (session_id, review['word_id'], review['correct'], datetime.now()))
+            
+            review_id = cursor.lastrowid
+            
+            # Get review details
+            cursor.execute('''
+                SELECT 
+                    wri.id,
+                    wri.word_id,
+                    w.kanji,
+                    w.romaji,
+                    w.english,
+                    wri.correct,
+                    wri.reviewed_at
+                FROM word_review_items wri
+                JOIN words w ON w.id = wri.word_id
+                WHERE wri.id = ?
+            ''', (review_id,))
+            
+            review_data = cursor.fetchone()
+            reviews_data.append({
+                "id": review_data['id'],
+                "word_id": review_data['word_id'],
+                "kanji": review_data['kanji'],
+                "romaji": review_data['romaji'],
+                "english": review_data['english'],
+                "correct": review_data['correct'],
+                "reviewed_at": review_data['reviewed_at']
+            })
+            
+        app.db.commit()
+        return jsonify({"reviews": reviews_data}), 200
+        
+    except Exception as e:
+        app.db.rollback()
+        return jsonify({"error": str(e)}), 500
 
   @app.route('/api/study-sessions/reset', methods=['POST'])
   @cross_origin()

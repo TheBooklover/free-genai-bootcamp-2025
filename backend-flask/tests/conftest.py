@@ -10,8 +10,8 @@ def app():
     return app
 
 @pytest.fixture
-def client(app):
-    """A test client for the app."""
+def client(app, setup_test_data):
+    """A test client for the app with test data."""
     return app.test_client()
 
 @pytest.fixture
@@ -46,4 +46,30 @@ def test_activity(app):
         
         # Cleanup after test
         cursor.execute('DELETE FROM study_activities WHERE id = ?', (activity_id,))
-        app.db.commit() 
+        app.db.commit()
+
+@pytest.fixture
+def setup_test_data(app):
+    """Set up test data for study sessions"""
+    cursor = app.db.cursor()
+    
+    # Add test group
+    cursor.execute('''
+        INSERT INTO groups (name) VALUES (?)
+    ''', ('Test Group',))
+    
+    # Add test activity
+    cursor.execute('''
+        INSERT INTO study_activities (name, url, preview_url)
+        VALUES (?, ?, ?)
+    ''', ('Test Activity', 'http://test.com', 'http://test.com/preview'))
+    
+    # Add test words
+    cursor.execute('''
+        INSERT INTO words (kanji, romaji, english)
+        VALUES 
+        (?, ?, ?),
+        (?, ?, ?)
+    ''', ('漢字1', 'kanji1', 'test1', '漢字2', 'kanji2', 'test2'))
+    
+    app.db.commit() 
