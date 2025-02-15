@@ -1,3 +1,5 @@
+import { api } from '../lib/axios';
+
 const API_BASE_URL = 'http://localhost:5000';
 
 // Group types
@@ -24,9 +26,14 @@ export interface Word {
   quebecois: string;
   standard_french: string;
   english: string;
+  pronunciation?: string;
+  usage_notes?: string;
   correct_count: number;
   wrong_count: number;
-  groups: WordGroup[];
+  groups?: Array<{
+    id: number;
+    name: string;
+  }>;
 }
 
 export interface WordResponse {
@@ -147,13 +154,9 @@ export const fetchWords = async (
   return response.json();
 };
 
-export const fetchWordDetails = async (wordId: number): Promise<Word> => {
-  const response = await fetch(`${API_BASE_URL}/words/${wordId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch word details');
-  }
-  const data: WordResponse = await response.json();
-  return data.word;
+export const fetchWordDetails = async (wordId: string | number): Promise<Word> => {
+  const response = await api.get(`/words/${wordId}`);
+  return response.data.word;
 };
 
 // Study Session API

@@ -1,77 +1,128 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@/test/utils';
-import WordShow from '../WordShow';
+import { render, screen, waitFor } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { useNavigation } from '@/context/NavigationContext';
-import type { Word } from '../WordShow';
+import { useQuery } from '@tanstack/react-query';
+import WordShow from '../WordShow';
+import { useNavigation } from '../../context/NavigationContext';
+import type { ReactElement, JSXElementConstructor } from 'react';
 
-// Mock NavigationContext
-vi.mock('@/context/NavigationContext', () => ({
-    useNavigation: () => ({
-        setCurrentWord: vi.fn(),
-    }),
-}));
-
-// Mock react-router-dom
+// Mock the required modules
 vi.mock('react-router-dom', () => ({
     useParams: vi.fn(),
-    Link: vi.fn(() => null),
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-// Mock react-query
 vi.mock('@tanstack/react-query', () => ({
     useQuery: vi.fn(),
 }));
 
+vi.mock('../../context/NavigationContext', () => ({
+    useNavigation: vi.fn(),
+}));
+
+// Mock data
+const mockWord = {
+    id: 1,
+    quebecois: 'pogner',
+    standard_french: 'attraper',
+    english: 'to catch',
+    pronunciation: 'pɔɲe',
+    usage_notes: 'Common verb in Quebec',
+    correct_count: 5,
+    wrong_count: 2,
+    groups: [
+        { id: 1, name: 'Verbs' },
+        { id: 2, name: 'Common Words' },
+    ],
+};
+
+// Wrap component with router
+const renderWithRouter = (component: ReactElement<any, JSXElementConstructor<any>>) => {
+    return render(
+        <BrowserRouter>
+            {component}
+        </BrowserRouter>
+    );
+};
+
 describe('WordShow', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
-        vi.mocked(useParams).mockReturnValue({ wordId: '1' });
+        vi.mocked(useNavigation).mockReturnValue({
+            setCurrentWord: vi.fn(),
+            currentWord: null,
+        } as any);
     });
 
-    it('renders word details', async () => {
+    it('renders loading state', () => {
+        // Setup
+        vi.mocked(useParams).mockReturnValue({ id: '1' });
         vi.mocked(useQuery).mockReturnValue({
-            data: {
-                id: 1,
-                quebecois: "char",
-                standard_french: "voiture",
-                english: "car",
-                correct_count: 0,
-                wrong_count: 0,
-            },
-            isLoading: false,
-            error: null,
-            status: 'success',
-            isError: false,
-            isPending: false,
-            isSuccess: true,
-            refetch: vi.fn(),
-        } as UseQueryResult<Word, Error>);
-
-        render(<WordShow />);
-        expect(await screen.findByText('char')).toBeInTheDocument();
-    });
-
-    it('displays loading state', async () => {
-        vi.mocked(useQuery).mockReturnValue({
-            data: null,
             isLoading: true,
+            data: undefined,
             error: null,
-        });
+        } as any);
 
-        render(<WordShow />);
-        expect(await screen.findByText(/loading/i)).toBeInTheDocument();
+        // Render
+        renderWithRouter(<WordShow />);
+
+        // Assert
+        expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
     });
 
-    it('handles error state', async () => {
+    it('renders word details when data is loaded', async () => {
+        // Setup
+        vi.mocked(useParams).mockReturnValue({ id: '1' });
         vi.mocked(useQuery).mockReturnValue({
-            data: null,
             isLoading: false,
-            error: new Error('Failed to fetch'),
-        });
+            data: mockWord,
+            error: null,
+        } as any);
 
-        render(<WordShow />);
-        expect(await screen.findByText('Failed to load word details')).toBeInTheDocument();
+        // Render
+        renderWithRouter(<WordShow />);
+
+        // Assert
+        await waitFor(() => {
+            expect(screen.getByText(mockWord.quebecois)).toBeInTheDocument();
+            expect(screen.getByText(mockWord.standard_french)).toBeInTheDocument();
+            expect(screen.getByText(mockWord.english)).toBeInTheDocument();
+            expect(screen.getByText(mockWord.pronunciation)).toBeInTheDocument();
+            expect(screen.getByText(mockWord.usage_notes)).toBeInTheDocument();
+            expect(screen.getByText('Verbs')).toBeInTheDocument();
+            expect(screen.getByText('Common Words')).toBeInTheDocument();
+        });
+    });
+
+    it('renders error state', () => {
+        // Setup
+        vi.mocked(useParams).mockReturnValue({ id: '1' });
+        vi.mocked(useQuery).mockReturnValue({
+            isLoading: false,
+            data: undefined,
+            error: new Error('Failed to fetch word'),
+        } as any);
+
+        // Render
+        renderWithRouter(<WordShow />);
+
+        // Assert
+        expect(screen.getByText('Error: Failed to fetch word')).toBeInTheDocument();
+    });
+
+    it('renders not found state when no word is returned', () => {
+        // Setup
+        vi.mocked(useParams).mockReturnValue({ id: '1' });
+        vi.mocked(useQuery).mockReturnValue({
+            isLoading: false,
+            data: undefined,
+            error: null,
+        } as any);
+
+        // Render
+        renderWithRouter(<WordShow />);
+
+        // Assert
+        expect(screen.getByText('Word not found')).toBeInTheDocument();
     });
 }); 
