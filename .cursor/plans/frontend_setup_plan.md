@@ -4,15 +4,15 @@
 This plan outlines the step-by-step process of setting up a modern frontend application using React, TypeScript, Tailwind CSS, and ShadCN/UI components.
 
 ## Prerequisites
-- [ ] Node.js installed (v16.0 or higher)
-- [ ] npm or yarn package manager
-- [ ] Code editor (VS Code recommended)
-- [ ] Basic knowledge of React and TypeScript
+- [x] Node.js installed (v16.0 or higher)
+- [x] npm or yarn package manager
+- [x] Code editor (VS Code recommended)
+- [x] Basic knowledge of React and TypeScript
 
 ## Implementation Steps
 
 ### 1. Project Creation
-- [ ] Create new Vite project
+- [x] Create new Vite project
 ```bash
 npm create vite@latest my-app -- --template react-ts
 cd my-app
@@ -21,14 +21,14 @@ npm install
 This creates a new project with Vite's React + TypeScript template, providing the base structure.
 
 ### 2. Install Core Dependencies
-- [ ] Install Tailwind and its dependencies
+- [x] Install Tailwind and its dependencies
 ```bash
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
 ```
 These packages enable Tailwind CSS styling and PostCSS processing.
 
-- [ ] Install ShadCN/UI
+- [x] Install ShadCN/UI
 ```bash
 npm install -D @shadcn/ui
 npx shadcn-ui@latest init
@@ -36,30 +36,30 @@ npx shadcn-ui@latest init
 This sets up ShadCN/UI component library and its configuration.
 
 ### 3. Install Additional Dependencies
-- [ ] Add routing and API client libraries
+- [x] Add routing and API client libraries
 ```bash
 npm install @tanstack/react-query
 npm install react-router-dom
 npm install axios
 ```
 These provide:
-- React Query: API data fetching and caching
-- React Router: Application routing
-- Axios: HTTP client
+- ✓ React Query: API data fetching and caching
+- ✓ React Router: Application routing
+- ✓ Axios: HTTP client
 
 ### 4. Configure Project Structure
-- [ ] Create essential directories
+- [x] Create essential directories
 ```bash
 mkdir -p src/{components,pages,lib,api}
 ```
 This creates a organized structure:
-- components/: Reusable UI components
-- pages/: Route components
-- lib/: Utility functions
-- api/: API integration code
+- ✓ components/: Reusable UI components
+- ✓ pages/: Route components
+- ✓ lib/: Utility functions
+- ✓ api/: API integration code
 
 ### 5. Setup API Client
-- [ ] Create API client configuration
+- [x] Create API client configuration
 ```typescript:src/lib/axios.ts
 import axios from 'axios';
 
@@ -73,7 +73,7 @@ export const api = axios.create({
 This creates a configured Axios instance for API calls.
 
 ### 6. Configure React Query
-- [ ] Set up React Query client
+- [x] Set up React Query client
 ```typescript:src/lib/react-query.ts
 import { QueryClient } from '@tanstack/react-query';
 
@@ -89,7 +89,7 @@ export const queryClient = new QueryClient({
 This configures React Query for data fetching and caching.
 
 ### 7. Setup Routing
-- [ ] Create router configuration
+- [x] Create router configuration
 ```typescript:src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -110,36 +110,58 @@ function App() {
 This sets up the basic routing structure with React Query integration.
 
 ### 8. Create Layout Component
-- [ ] Add base layout component
+- [x] Add base layout component
 ```typescript:src/components/Layout.tsx
+import { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
+import AppSidebar from '@/components/Sidebar';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export function Layout() {
+interface LayoutProps {
+    children?: ReactNode;
+}
+
+export function Layout({ children }: LayoutProps) {
     return (
-        <div className="min-h-screen bg-background">
-            <header className="border-b">
-                {/* Header content */}
-            </header>
-            <main className="container mx-auto py-6">
-                <Outlet />
-            </main>
-        </div>
+        <SidebarProvider>
+            <div className="min-h-screen bg-background">
+                <AppSidebar />
+                <SidebarInset>
+                    <Breadcrumbs />
+                    <main className="container mx-auto py-6">
+                        {children || <Outlet />}
+                    </main>
+                </SidebarInset>
+            </div>
+        </SidebarProvider>
     );
 }
 ```
-This provides a consistent layout structure for all pages.
+This provides a consistent layout structure integrating your existing sidebar and breadcrumbs components.
 
 ### 9. Testing Setup
-- [ ] Install testing libraries
+- [x] Install testing libraries
 ```bash
-npm install -D vitest @testing-library/react @testing-library/jest-dom
+npm install -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event
 ```
 
-- [ ] Create test setup file
+- [x] Create test setup files
 ```typescript:src/test/setup.ts
 import '@testing-library/jest-dom';
+import { expect, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import matchers from '@testing-library/jest-dom/matchers';
+
+// Extend Vitest's expect method
+expect.extend(matchers);
+
+// Cleanup after each test case
+afterEach(() => {
+    cleanup();
+});
 ```
-This sets up the testing environment.
+This sets up the testing environment with React Testing Library and Vitest.
 
 ## API Documentation
 

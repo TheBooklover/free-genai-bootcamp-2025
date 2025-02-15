@@ -1,3 +1,5 @@
+"use client"
+
 import { createContext, useContext, useEffect, useState } from "react"
 
 type Theme = "dark" | "light" | "system"
@@ -26,7 +28,7 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(
+  const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   )
 
@@ -42,20 +44,19 @@ export function ThemeProvider({
         : "light"
 
       root.classList.add(systemTheme)
-    } else {
-      setTimeout(() => {
-        root.classList.add(theme)
-      }, 1)
+      return
     }
 
+    root.classList.add(theme)
   }, [theme])
 
-  const setTheme = (newTheme: Theme) => {
-    localStorage.setItem(storageKey, newTheme)
-    setThemeState(newTheme)
+  const value = {
+    theme,
+    setTheme: (theme: Theme) => {
+      localStorage.setItem(storageKey, theme)
+      setTheme(theme)
+    },
   }
-
-  const value = { theme, setTheme }
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
