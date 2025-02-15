@@ -4,7 +4,7 @@ import WordsTable, { WordSortKey } from '../components/WordsTable'
 
 export default function Words() {
   const [words, setWords] = useState<Word[]>([])
-  const [sortKey, setSortKey] = useState<WordSortKey>('kanji')
+  const [sortKey, setSortKey] = useState<WordSortKey>('quebecois')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -60,7 +60,7 @@ export default function Words() {
 
       <div className="flex justify-center space-x-2">
         <button
-          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          onClick={() => setCurrentPage((p: number) => Math.max(1, p - 1))}
           disabled={currentPage === 1}
           className="px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
@@ -70,7 +70,7 @@ export default function Words() {
           Page {currentPage} of {totalPages}
         </span>
         <button
-          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          onClick={() => setCurrentPage((p: number) => Math.min(totalPages, p + 1))}
           disabled={currentPage === totalPages}
           className="px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
         >

@@ -1,9 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronUp, ChevronDown } from 'lucide-react'
-import { StudySession } from '../services/api'
-
-export type StudySessionSortKey = 'id' | 'activity_name' | 'group_name' | 'start_time' | 'end_time' | 'review_items_count'
+import { StudySession, StudySessionSortKey } from '../services/api'
 
 interface StudySessionsTableProps {
   sessions: StudySession[]
@@ -18,12 +16,21 @@ export default function StudySessionsTable({
   sortDirection, 
   onSort 
 }: StudySessionsTableProps) {
+  const columnKeys: StudySessionSortKey[] = [
+    'id',
+    'activity_name',
+    'group_name',
+    'start_time',
+    'end_time',
+    'review_items_count'
+  ];
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-900">
           <tr>
-            {(['id', 'activity_name', 'group_name', 'start_time', 'end_time', 'review_items_count'] as const).map((key) => (
+            {columnKeys.map((key) => (
               <th
                 key={key}
                 scope="col"

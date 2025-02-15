@@ -66,10 +66,10 @@ def setup_test_data(app):
     
     # Add test words
     cursor.execute('''
-        INSERT INTO words (kanji, romaji, english)
+        INSERT INTO words (quebecois, standard_french, english)
         VALUES 
         (?, ?, ?),
         (?, ?, ?)
-    ''', ('漢字1', 'kanji1', 'test1', '漢字2', 'kanji2', 'test2'))
+    ''', ('pogner', 'attraper', 'to catch', 'chialer', 'se plaindre', 'to complain'))
     
     app.db.commit() 

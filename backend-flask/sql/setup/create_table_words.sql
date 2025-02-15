@@ -1,7 +1,10 @@
 CREATE TABLE IF NOT EXISTS words (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  kanji TEXT NOT NULL,
-  romaji TEXT NOT NULL,
+  quebecois TEXT NOT NULL,
+  standard_french TEXT NOT NULL,
   english TEXT NOT NULL,
-  parts TEXT NOT NULL  -- Store parts as JSON string
+  pronunciation TEXT,
+  usage_notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

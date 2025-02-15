@@ -78,9 +78,9 @@ def test_submit_review_success(client, app):
         
         # Create a test word
         cursor.execute('''
-            INSERT INTO words (kanji, romaji, english)
+            INSERT INTO words (quebecois, standard_french, english)
             VALUES (?, ?, ?)
-        ''', ('漢字', 'kanji', 'chinese characters'))
+        ''', ('pogner', 'attraper', 'to catch/grab'))
         word_id = cursor.lastrowid
         
         app.db.commit()
@@ -96,9 +96,9 @@ def test_submit_review_success(client, app):
     data = response.get_json()
     assert data['word_id'] == word_id
     assert data['correct'] == True
-    assert data['kanji'] == '漢字'
-    assert data['romaji'] == 'kanji'
-    assert data['english'] == 'chinese characters'
+    assert data['quebecois'] == 'pogner'
+    assert data['standard_french'] == 'attraper'
+    assert data['english'] == 'to catch/grab'
     assert 'reviewed_at' in data
 
 def test_submit_review_invalid_session(client, app):
@@ -106,9 +106,9 @@ def test_submit_review_invalid_session(client, app):
     # Setup test word
     with app.db.cursor() as cursor:
         cursor.execute('''
-            INSERT INTO words (kanji, romaji, english)
+            INSERT INTO words (quebecois, standard_french, english)
             VALUES (?, ?, ?)
-        ''', ('漢字', 'kanji', 'chinese characters'))
+        ''', ('pogner', 'attraper', 'to catch/grab'))
         word_id = cursor.lastrowid
         app.db.commit()
     

@@ -227,7 +227,7 @@ def load(app):
         JOIN word_review_items wri ON wri.word_id = w.id
         WHERE wri.study_session_id = ?
         GROUP BY w.id
-        ORDER BY w.kanji
+        ORDER BY w.quebecois
         LIMIT ? OFFSET ?
       ''', (id, per_page, offset))
       
@@ -256,8 +256,8 @@ def load(app):
         },
         'words': [{
           'id': word['id'],
-          'kanji': word['kanji'],
-          'romaji': word['romaji'],
+          'quebecois': word['quebecois'],
+          'standard_french': word['standard_french'],
           'english': word['english'],
           'correct_count': word['session_correct_count'],
           'wrong_count': word['session_wrong_count']
@@ -350,8 +350,8 @@ def load(app):
                 SELECT 
                     wri.id,
                     wri.word_id,
-                    w.kanji,
-                    w.romaji,
+                    w.quebecois,
+                    w.standard_french,
                     w.english,
                     wri.correct,
                     wri.reviewed_at
@@ -364,8 +364,8 @@ def load(app):
             reviews_data.append({
                 "id": review_data['id'],
                 "word_id": review_data['word_id'],
-                "kanji": review_data['kanji'],
-                "romaji": review_data['romaji'],
+                "quebecois": review_data['quebecois'],
+                "standard_french": review_data['standard_french'],
                 "english": review_data['english'],
                 "correct": review_data['correct'],
                 "reviewed_at": review_data['reviewed_at']
