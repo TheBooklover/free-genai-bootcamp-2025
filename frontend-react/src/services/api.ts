@@ -38,6 +38,7 @@ export interface Word {
     id: number;
     name: string;
   }>;
+  created_at: string;
 }
 
 export interface WordResponse {
@@ -119,8 +120,10 @@ export interface GroupDetails {
 
 export interface GroupWordsResponse {
   words: Word[];
+  total: number;
+  page: number;
+  per_page: number;
   total_pages: number;
-  current_page: number;
 }
 
 export const fetchGroupDetails = async (groupId: number): Promise<GroupDetails> => {
@@ -131,16 +134,19 @@ export const fetchGroupDetails = async (groupId: number): Promise<GroupDetails> 
 export const fetchGroupWords = async (
   groupId: number,
   page: number = 1,
-  sortBy: string = 'quebecois',
+  per_page: number = 10,
+  sort_by: string = 'term',
   order: 'asc' | 'desc' = 'asc'
 ): Promise<GroupWordsResponse> => {
-  const response = await fetch(
-    `${API_BASE_URL}/groups/${groupId}/words?page=${page}&sort_by=${sortBy}&order=${order}`
-  );
-  if (!response.ok) {
-    throw new Error('Failed to fetch group words');
-  }
-  return response.json();
+  const response = await api.get(`/groups/${groupId}/words`, {
+    params: {
+      page,
+      per_page,
+      sort_by,
+      order
+    }
+  });
+  return response.data;
 };
 
 // Word API

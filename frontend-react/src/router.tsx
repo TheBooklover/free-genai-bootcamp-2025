@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createRouter, createRootRoute, createRoute } from '@tanstack/react-router';
 import { Layout } from './components/Layout';
 import GroupDetails from './components/GroupDetails';
+import { createBrowserRouter } from 'react-router-dom';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -34,4 +35,11 @@ declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
   }
-} 
+}
+
+export const browserRouter = createBrowserRouter([
+  {
+    path: '/groups/:groupId',
+    element: <GroupDetails />
+  }
+]); 

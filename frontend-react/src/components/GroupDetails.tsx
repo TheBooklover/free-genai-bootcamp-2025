@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useGroupDetails } from '../hooks/useGroupDetails';
 import {
   Card,
@@ -6,60 +7,79 @@ import {
   CardTitle,
 } from './ui/card';
 import { Skeleton } from './ui/skeleton';
-import { formatDate } from '../lib/utils';
-import type { ReactElement } from 'react';
+import GroupWordsList from './GroupWordsList';
+import { ErrorBoundary } from './ErrorBoundary';
 
-interface GroupDetailsProps {
-  groupId: number;
-}
-
-export default function GroupDetails({ groupId }: GroupDetailsProps) {
-  const { data, isLoading, error } = useGroupDetails(groupId);
+export default function GroupDetails() {
+  const { groupId } = useParams<{ groupId: string }>();
+  const { data: group, isLoading, error } = useGroupDetails(Number(groupId));
 
   if (error) {
     return (
-      <div className="p-4 text-red-500">
-        Error loading group details: {error.message}
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
       <Card>
-        <CardHeader>
-          <div data-testid="skeleton-header">
-            <Skeleton className="h-8 w-[200px]" />
-          </div>
-        </CardHeader>
         <CardContent>
-          <div data-testid="skeleton-content">
-            <Skeleton className="h-4 w-[150px]" />
-            <Skeleton className="h-4 w-[100px]" />
-            <Skeleton className="h-4 w-[120px]" />
+          <div className="text-red-500">
+            Error loading group: {error.message}
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (!data) return null;
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-[200px]" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-[300px]" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!group) {
+    return null;
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{data.name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div>Words: {data.word_count}</div>
-        {data.success_rate !== undefined && (
-          <div>Success Rate: {(data.success_rate * 100).toFixed(1)}%</div>
-        )}
-        {data.last_studied_at && (
-          <div>Last Studied: {formatDate(data.last_studied_at)}</div>
-        )}
-        {data.description && <p>{data.description}</p>}
-      </CardContent>
-    </Card>
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>{group.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            <div>
+              <span className="font-medium">Word Count:</span> {group.word_count}
+            </div>
+            {group.description && (
+              <div>
+                <span className="font-medium">Description:</span> {group.description}
+              </div>
+            )}
+            {group.last_studied_at && (
+              <div>
+                <span className="font-medium">Last Studied:</span>{' '}
+                {new Date(group.last_studied_at).toLocaleDateString()}
+              </div>
+            )}
+            {group.success_rate !== undefined && (
+              <div>
+                <span className="font-medium">Success Rate:</span>{' '}
+                {Math.round(group.success_rate * 100)}%
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <ErrorBoundary>
+        <GroupWordsList groupId={Number(groupId)} />
+      </ErrorBoundary>
+    </div>
   );
 } 
