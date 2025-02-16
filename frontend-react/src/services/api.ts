@@ -108,8 +108,13 @@ export const fetchGroups = async (
 
 export interface GroupDetails {
   id: number;
-  group_name: string;
+  name: string;
   word_count: number;
+  created_at: string;
+  updated_at: string;
+  description?: string;
+  last_studied_at?: string;
+  success_rate?: number;
 }
 
 export interface GroupWordsResponse {
@@ -118,17 +123,9 @@ export interface GroupWordsResponse {
   current_page: number;
 }
 
-export const fetchGroupDetails = async (
-  groupId: number,
-  page: number = 1,
-  sortBy: string = 'quebecois',
-  order: 'asc' | 'desc' = 'asc'
-): Promise<GroupDetails> => {
-  const response = await fetch(`${API_BASE_URL}/groups/${groupId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch group details');
-  }
-  return response.json();
+export const fetchGroupDetails = async (groupId: number): Promise<GroupDetails> => {
+  const response = await api.get(`/groups/${groupId}`);
+  return response.data;
 };
 
 export const fetchGroupWords = async (

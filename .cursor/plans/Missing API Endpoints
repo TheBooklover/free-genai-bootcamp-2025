@@ -10,12 +10,15 @@ For managing vocabulary words and their associated data:
   - Paginated list of all words
   - Supports sorting and filtering
   - Returns word details and metadata
-- [x ] `GET /words/{wordId}` - For fetching word details
+- [x] `GET /words/{wordId}` - For fetching word details
 
 ## Groups API Endpoints
 For handling word groupings and collections:
 
-- [ ] `GET /groups` - For fetching paginated groups
+- [x] `GET /groups` - For fetching paginated groups
+  - Paginated list of all groups
+  - Supports sorting by name, word_count, created_at
+  - Returns group details and metadata
 - [ ] `GET /groups/{groupId}` - For fetching group details
 - [ ] `GET /groups/{groupId}/words` - For fetching words in a group
 - [ ] `GET /groups/{groupId}/study_sessions` - For fetching group study sessions
@@ -34,6 +37,6 @@ For displaying user progress and statistics:
 - [ ] `GET /dashboard/stats` - For fetching study statistics
 
 ## Priority Assessment
-The most critical missing endpoints appear to be the Words API endpoints and most of the Groups API endpoints, as they're core to the application's functionality.
+The most critical missing endpoints appear to be the Groups API endpoints (except for GET /groups which is now implemented) and the Study Sessions API endpoints, as they're core to the application's functionality.
 Let me know if you would like implementations for any of these specific endpoints.
 

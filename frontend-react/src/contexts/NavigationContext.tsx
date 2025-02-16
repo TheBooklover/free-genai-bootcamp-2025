@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import * as React from "react"
+import { createContext, useContext, useState } from 'react';
 import { Group } from '../services/api';
 
 interface NavigationContextType {
@@ -8,13 +9,24 @@ interface NavigationContextType {
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
-export function NavigationProvider({ children }: { children: ReactNode }) {
+interface NavigationProviderProps {
+  children: React.ReactNode;
+}
+
+export function NavigationProvider({ children }: NavigationProviderProps) {
   const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
 
+  const value = {
+    currentGroup,
+    setCurrentGroup,
+  };
+
   return (
-    <NavigationContext.Provider value={{ currentGroup, setCurrentGroup }}>
-      {children}
-    </NavigationContext.Provider>
+    <div className="navigation-provider">
+      <NavigationContext.Provider value={value}>
+        {children}
+      </NavigationContext.Provider>
+    </div>
   );
 }
 
