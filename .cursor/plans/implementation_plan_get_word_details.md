@@ -12,6 +12,8 @@ This plan outlines how to implement and integrate the word details endpoint with
 ## Implementation Steps
 
 ### 1. Update API Types
+- [x] Add or update Word interface in api.ts
+- [x] Add fetchWordDetails function
 ```typescript:src/services/api.ts
 // Add or update Word interface
 export interface Word {
@@ -37,11 +39,17 @@ export const fetchWordDetails = async (wordId: string | number): Promise<Word> =
 ```
 
 ### 2. Create Word Details Hook
+- [x] Create useWordDetails.ts file
+- [x] Implement hook with React Query
+- [x] Add proper type definitions
+  - [x] Add UseQueryResult type
+  - [x] Add explicit return type
+  - [x] Fix import paths
 ```typescript:src/hooks/useWordDetails.ts
-import { useQuery } from '@tanstack/react-query';
-import { fetchWordDetails, type Word } from '@/services/api';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { fetchWordDetails, type Word } from '../services/api';
 
-export function useWordDetails(wordId: string | number) {
+export function useWordDetails(wordId: string | number): UseQueryResult<Word, Error> {
   return useQuery({
     queryKey: ['word', wordId],
     queryFn: () => fetchWordDetails(wordId),
@@ -51,194 +59,124 @@ export function useWordDetails(wordId: string | number) {
 ```
 
 ### 3. Update WordShow Component
-```typescript:src/pages/WordShow.tsx
-import { useParams } from 'react-router-dom';
-import { useWordDetails } from '@/hooks/useWordDetails';
-import { useNavigation } from '@/context/NavigationContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-export default function WordShow() {
-  const { id } = useParams<{ id: string }>();
-  const { data: word, isLoading, error } = useWordDetails(id!);
-  const { setCurrentWord } = useNavigation();
-
-  useEffect(() => {
-    if (word) {
-      setCurrentWord(word);
-    }
-  }, [word, setCurrentWord]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
-  if (!word) {
-    return <div>Word not found</div>;
-  }
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{word.quebecois}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-2 gap-4">
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Standard French</dt>
-              <dd className="text-lg">{word.standard_french}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">English</dt>
-              <dd className="text-lg">{word.english}</dd>
-            </div>
-            {word.pronunciation && (
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Pronunciation</dt>
-                <dd className="text-lg">{word.pronunciation}</dd>
-              </div>
-            )}
-            {word.usage_notes && (
-              <div className="col-span-2">
-                <dt className="text-sm font-medium text-gray-500">Usage Notes</dt>
-                <dd className="text-lg">{word.usage_notes}</dd>
-              </div>
-            )}
-          </dl>
-        </CardContent>
-      </Card>
-      
-      {word.groups && word.groups.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Groups</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2 flex-wrap">
-              {word.groups.map(group => (
-                <span 
-                  key={group.id}
-                  className="px-2 py-1 bg-primary/10 rounded-md text-sm"
-                >
-                  {group.name}
-                </span>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-}
-```
+- [x] 3.1. Add imports and type definitions
+- [x] 3.2. Implement loading state with skeleton
+- [x] 3.3. Add error handling
+- [x] 3.4. Create word details display
+- [x] 3.5. Add groups display section
 
 ### 4. Add Tests
-```typescript:src/pages/__tests__/WordShow.test.tsx
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import WordShow from '../WordShow';
-
-// Mock dependencies
-vi.mock('react-router-dom', () => ({
-  useParams: vi.fn(),
-}));
-
-vi.mock('@tanstack/react-query', () => ({
-  useQuery: vi.fn(),
-}));
-
-vi.mock('@/context/NavigationContext', () => ({
-  useNavigation: () => ({
-    setCurrentWord: vi.fn(),
-  }),
-}));
-
-describe('WordShow', () => {
-  it('renders loading state', () => {
-    vi.mocked(useParams).mockReturnValue({ id: '1' });
-    vi.mocked(useQuery).mockReturnValue({
-      isLoading: true,
-      data: undefined,
-      error: null,
-    } as any);
-
-    render(<WordShow />);
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-  });
-
-  it('renders word details', async () => {
-    const mockWord = {
-      id: 1,
-      quebecois: 'pogner',
-      standard_french: 'attraper',
-      english: 'to catch',
-      pronunciation: 'pɔɲe',
-      usage_notes: 'Common verb',
-      groups: [{ id: 1, name: 'Verbs' }],
-    };
-
-    vi.mocked(useParams).mockReturnValue({ id: '1' });
-    vi.mocked(useQuery).mockReturnValue({
-      isLoading: false,
-      data: mockWord,
-      error: null,
-    } as any);
-
-    render(<WordShow />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('pogner')).toBeInTheDocument();
-      expect(screen.getByText('attraper')).toBeInTheDocument();
-      expect(screen.getByText('to catch')).toBeInTheDocument();
-      expect(screen.getByText('Common verb')).toBeInTheDocument();
-      expect(screen.getByText('Verbs')).toBeInTheDocument();
-    });
-  });
-
-  it('renders error state', () => {
-    vi.mocked(useParams).mockReturnValue({ id: '1' });
-    vi.mocked(useQuery).mockReturnValue({
-      isLoading: false,
-      data: undefined,
-      error: new Error('Failed to fetch'),
-    } as any);
-
-    render(<WordShow />);
-    expect(screen.getByText('Error: Failed to fetch')).toBeInTheDocument();
-  });
-});
-```
+- [x] 4.1. Create test file if not exists
+- [x] 4.2. Add mock setup for dependencies
+- [x] 4.3. Implement loading state test
+- [x] 4.4. Implement successful render test
+- [x] 4.5. Implement error state test
 
 ### 5. Update Navigation Context
-```typescript:src/context/NavigationContext.tsx
-// Add or update Word type import
-import type { Word } from '@/services/api';
+- [x] 5.1. Import Word type
+- [x] 5.2. Update context interface
+- [x] 5.3. Add currentWord state
+- [x] 5.4. Implement setCurrentWord function
 
-interface NavigationContextType {
-  currentWord: Word | null;
-  setCurrentWord: (word: Word | null) => void;
-  // ... other context properties
+## Testing Steps
+- [x] 1. Install required testing dependencies
+- [x] 2. Set up test environment
+- [x] 3. Run the test suite
+- [x] 4. Verify all tests pass
+  - [x] Loading state test passed
+  - [x] Word details render test passed
+  - [x] Error state test passed
+  - [x] Not found state test passed
+- [ ] 5. Check test coverage
+
+## API Documentation
+
+### GET /words/{wordId}
+
+Fetch detailed information about a specific word.
+
+#### Request
+- Method: `GET`
+- URL: `/api/words/{wordId}`
+- Authentication: None (for now)
+
+**URL Parameters:**
+| Parameter | Type    | Required | Description        |
+|-----------|---------|----------|--------------------|
+| wordId    | integer | Yes      | ID of word to fetch|
+
+#### Response
+
+**Success Response (200 OK)**
+```json
+{
+  "word": {
+    "id": 1,
+    "quebecois": "pogner",
+    "standard_french": "attraper",
+    "english": "to catch/grab",
+    "pronunciation": "pɔɲe",
+    "usage_notes": "Very versatile verb in Quebec. Can mean to catch, grab, get, or understand.",
+    "correct_count": 5,
+    "wrong_count": 2,
+    "groups": [
+      {
+        "id": 1,
+        "name": "Common Verbs"
+      },
+      {
+        "id": 2,
+        "name": "Everyday Speech"
+      }
+    ]
+  }
 }
 ```
 
-## Testing Steps
-1. Start the development server
-2. Navigate to a word detail page (e.g., /words/1)
-3. Verify loading state appears
-4. Verify word details render correctly
-5. Verify groups are displayed if present
-6. Verify error handling works by temporarily breaking the API URL
-7. Run the test suite: `npm run test`
+**Error Responses**
 
-## Additional Considerations
-- [ ] Add error boundary for component-level error handling
-- [ ] Implement loading skeletons for better UX
-- [ ] Add retry logic for failed requests
-- [ ] Consider adding word detail caching strategy
-- [ ] Add proper TypeScript types for API responses 
+*Not Found (404)*
+```json
+{
+  "error": "Word not found"
+}
+```
+
+*Bad Request (400)*
+```json
+{
+  "error": "Invalid word ID format"
+}
+```
+
+*Server Error (500)*
+```json
+{
+  "error": "Internal server error message"
+}
+```
+
+#### Example Usage
+
+```bash
+# Fetch word with ID 123
+curl -X GET http://localhost:5000/api/words/123
+
+# Using axios in TypeScript
+const response = await api.get(`/words/${wordId}`);
+const word = response.data.word;
+```
+
+#### Notes
+- The endpoint includes groups the word belongs to
+- Correct and wrong counts reflect the study history
+- Optional fields (pronunciation, usage_notes) may be null
+- Groups array may be empty
+
+#### Rate Limiting
+- Current limit: None
+- Future consideration: Implement rate limiting for production
+
+#### Caching
+- Current: No caching
+- Future consideration: Add ETag support for caching

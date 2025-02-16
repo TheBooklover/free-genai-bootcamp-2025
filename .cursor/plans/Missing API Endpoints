@@ -10,7 +10,7 @@ For managing vocabulary words and their associated data:
   - Paginated list of all words
   - Supports sorting and filtering
   - Returns word details and metadata
-- [ ] `GET /words/{wordId}` - For fetching word details
+- [x ] `GET /words/{wordId}` - For fetching word details
 
 ## Groups API Endpoints
 For handling word groupings and collections:

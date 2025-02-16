@@ -5,14 +5,18 @@ const API_BASE_URL = 'http://localhost:5000';
 // Group types
 export interface Group {
   id: number;
-  group_name: string;
+  name: string;
   word_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface GroupsResponse {
   groups: Group[];
+  total: number;
+  page: number;
+  per_page: number;
   total_pages: number;
-  current_page: number;
 }
 
 // Word types
@@ -87,16 +91,19 @@ export interface StudyStats {
 // Group API
 export const fetchGroups = async (
   page: number = 1,
-  sortBy: string = 'name',
+  per_page: number = 10,
+  sort_by: string = 'name',
   order: 'asc' | 'desc' = 'asc'
 ): Promise<GroupsResponse> => {
-  const response = await fetch(
-    `${API_BASE_URL}/groups?page=${page}&sort_by=${sortBy}&order=${order}`
-  );
-  if (!response.ok) {
-    throw new Error('Failed to fetch groups');
-  }
-  return response.json();
+  const response = await api.get('/groups', {
+    params: {
+      page,
+      per_page,
+      sort_by,
+      order
+    }
+  });
+  return response.data;
 };
 
 export interface GroupDetails {
