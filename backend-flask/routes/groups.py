@@ -1,21 +1,41 @@
 from flask import request, jsonify, g
 from flask_cors import cross_origin
 import json
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import sqlite3
 
 def load(app):
+  limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+  )
+  limiter.init_app(app)
+
   @app.route('/groups', methods=['GET'])
   @cross_origin()
+  @limiter.limit("60 per minute")  # Reasonable limit for read operations
   def get_groups():
     try:
       cursor = app.db.cursor()
 
       # Get the current page number from query parameters (default is 1)
-      page = int(request.args.get('page', 1))
+      try:
+        page = int(request.args.get('page', 1))
+        if page < 1:
+          return jsonify({"error": "Page number must be positive"}), 400
+      except ValueError:
+        return jsonify({"error": "Invalid page number"}), 400
+
+      # Validate sort parameters
+      sort_by = request.args.get('sort_by', 'name')
+      if sort_by not in ['name', 'words_count']:
+        return jsonify({"error": "Invalid sort column"}), 400
+
       groups_per_page = 10
       offset = (page - 1) * groups_per_page
 
       # Get sorting parameters from the query string
-      sort_by = request.args.get('sort_by', 'name')  # Default to sorting by 'name'
       order = request.args.get('order', 'asc')  # Default to ascending order
 
       # Validate sort_by and order
@@ -25,13 +45,27 @@ def load(app):
       if order not in ['asc', 'desc']:
         order = 'asc'
 
-      # Query to fetch groups with sorting and the cached word count
-      cursor.execute(f'''
-        SELECT id, name, words_count
-        FROM groups
-        ORDER BY {sort_by} {order}
-        LIMIT ? OFFSET ?
-      ''', (groups_per_page, offset))
+      # Get search parameter
+      search = request.args.get('search', '').strip()
+      
+      # Base query
+      query = '''
+          SELECT id, name, words_count
+          FROM groups
+          WHERE 1=1
+      '''
+      params = []
+
+      # Add search condition if search parameter is provided
+      if search:
+          query += ' AND name LIKE ?'
+          params.append(f'%{search}%')
+
+      # Add sorting and pagination
+      query += f' ORDER BY {sort_by} {order} LIMIT ? OFFSET ?'
+      params.extend([groups_per_page, offset])
+
+      cursor.execute(query, params)
 
       groups = cursor.fetchall()
 
@@ -55,7 +89,11 @@ def load(app):
         'total_pages': total_pages,
         'current_page': page
       })
+    except sqlite3.OperationalError as e:
+      app.logger.error(f"Database error in get_groups: {str(e)}")
+      return jsonify({"error": "Database error"}), 500
     except Exception as e:
+      app.logger.error(f"Error in get_groups: {str(e)}")
       return jsonify({"error": str(e)}), 500
 
   @app.route('/groups/<int:id>', methods=['GET'])

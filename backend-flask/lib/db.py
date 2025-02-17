@@ -36,26 +36,13 @@ class Db:
     with open(filepath, 'r') as file:
       return json.load(file)
 
-  def setup_tables(self,cursor):
+  def setup_tables(self, cursor):
     # Create the necessary tables
-    cursor.execute(self.sql('setup/create_table_words.sql'))
-    self.get().commit()
-
-    cursor.execute(self.sql('setup/create_table_word_reviews.sql'))
-    self.get().commit()
-
-    cursor.execute(self.sql('setup/create_table_word_review_items.sql'))
-    self.get().commit()
-
     cursor.execute(self.sql('setup/create_table_groups.sql'))
-    self.get().commit()
-
+    cursor.execute(self.sql('setup/create_table_words.sql'))
+    cursor.execute(self.sql('setup/create_table_word_reviews.sql'))
     cursor.execute(self.sql('setup/create_table_word_groups.sql'))
-    self.get().commit()
-
     cursor.execute(self.sql('setup/create_table_study_activities.sql'))
-    self.get().commit()
-
     cursor.execute(self.sql('setup/create_table_study_sessions.sql'))
     self.get().commit()
 

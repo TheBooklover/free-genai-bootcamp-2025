@@ -1,8 +1,8 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, current_app
 from flask_cors import cross_origin
 import json
 from typing import Dict, Any
-from db import get_db
+from lib.db import Db
 
 words_bp = Blueprint('words', __name__)
 
@@ -10,8 +10,7 @@ words_bp = Blueprint('words', __name__)
 def get_words():
     try:
         # TODO: Implement pagination, sorting, and filtering
-        db = get_db()
-        cursor = db.cursor()
+        cursor = Db().cursor()
         
         # Basic query to get all words - will be enhanced later
         cursor.execute('SELECT * FROM words')
@@ -49,8 +48,7 @@ def get_words_with_pagination():
         - total_words: Total number of words
     """
     try:
-        db = g.db
-        cursor = db.cursor()
+        cursor = current_app.db.cursor()
 
         # Validate and parse pagination parameters
         try:
@@ -161,7 +159,7 @@ def get_word(word_id):
         - word: Word object with all details including associated groups
     """
     try:
-        cursor = g.db.cursor()
+        cursor = Db().cursor()
         
         cursor.execute('''
             SELECT w.id, w.quebecois, w.standard_french, w.english,

@@ -10,7 +10,7 @@ For managing vocabulary words and their associated data:
   - Paginated list of all words
   - Supports sorting and filtering
   - Returns word details and metadata
-- [ ] `GET /words/{wordId}` - For fetching word details
+- [x] `GET /words/{wordId}` - For fetching word details
 
 ## Groups API Endpoints
 For handling word groupings and collections:
@@ -18,20 +18,25 @@ For handling word groupings and collections:
 - [ ] `GET /groups` - For fetching paginated groups
 - [ ] `GET /groups/{groupId}` - For fetching group details
 - [ ] `GET /groups/{groupId}/words` - For fetching words in a group
-- [ ] `GET /groups/{groupId}/study_sessions` - For fetching group study sessions
+- [x] `GET /groups/{groupId}/study_sessions` - For fetching group study sessions
 
 ## Study Sessions API Endpoints
 For managing learning sessions and progress tracking:
 
 - [ ] `GET /study_sessions` - For fetching paginated study sessions
 - [ ] `GET /study_sessions/{sessionId}` - For fetching session details
-- [ ] `POST /study_sessions/{sessionId}/review` - For submitting session reviews
+- [x] `POST /study_sessions/{sessionId}/review` - For submitting session reviews
+
+## Study Activities API Endpoints
+- [ ] `GET /study-activities` - For fetching all study activities
+- [ ] `GET /study-activities/{id}` - For fetching activity details
+- [ ] `GET /study-activities/{id}/sessions` - For fetching activity sessions
 
 ## Dashboard API Endpoints
 For displaying user progress and statistics:
 
-- [ ] `GET /dashboard/recent-session` - For fetching recent study session
-- [ ] `GET /dashboard/stats` - For fetching study statistics
+- [x] `GET /dashboard/recent-session` - For fetching recent study session
+- [x] `GET /dashboard/stats` - For fetching study statistics
 
 ## Priority Assessment
 The most critical missing endpoints appear to be the Words API endpoints and most of the Groups API endpoints, as they're core to the application's functionality.
