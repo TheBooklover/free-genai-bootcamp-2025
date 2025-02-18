@@ -178,9 +178,11 @@ def load(app):
       for word in words:
         words_data.append({
           "id": word["id"],
-          "kanji": word["kanji"],
-          "romaji": word["romaji"],
+          "quebecois": word["quebecois"],
+          "standard_french": word["standard_french"],
           "english": word["english"],
+          "pronunciation": word["pronunciation"],
+          "usage_notes": word["usage_notes"],
           "correct_count": word["correct_count"],
           "wrong_count": word["wrong_count"]
         })
@@ -193,7 +195,79 @@ def load(app):
     except Exception as e:
       return jsonify({"error": str(e)}), 500
 
-  # todo GET /groups/:id/words/raw
+  @app.route('/groups/<int:id>/words/raw', methods=['GET'])
+  @cross_origin()
+  def get_group_words_raw(id):
+    """Fetch all words for a specific group without pagination or sorting.
+    
+    This endpoint returns the complete set of words for bulk operations and exports.
+    Unlike the paginated /words endpoint, this returns all words at once.
+    
+    Args:
+        id (int): The group ID to fetch words for
+        
+    Returns:
+        JSON response with:
+        - words: List of word objects containing:
+            - id: Word ID
+            - kanji: Japanese kanji
+            - romaji: Romanized Japanese
+            - english: English translation
+            - correct_count: Number of correct reviews
+            - wrong_count: Number of incorrect reviews
+        - total_count: Total number of words in the group
+        
+    Error Responses:
+        - 404: Group not found
+        - 500: Server error
+    """
+    try:
+      cursor = app.db.cursor()
+
+      # First, check if the group exists
+      cursor.execute('SELECT name FROM groups WHERE id = ?', (id,))
+      group = cursor.fetchone()
+      if not group:
+        return jsonify({"error": "Group not found"}), 404
+
+      # Query to fetch all words without pagination or sorting
+      cursor.execute('''
+        SELECT w.id,
+               w.quebecois,
+               w.standard_french,
+               w.english,
+               w.pronunciation,
+               w.usage_notes,
+               COALESCE(wr.correct_count, 0) as correct_count,
+               COALESCE(wr.wrong_count, 0) as wrong_count
+        FROM words w
+        JOIN word_groups wg ON w.id = wg.word_id
+        LEFT JOIN word_reviews wr ON w.id = wr.word_id
+        WHERE wg.group_id = ?
+      ''', (id,))
+      
+      words = cursor.fetchall()
+
+      # Format the response
+      words_data = []
+      for word in words:
+        words_data.append({
+          "id": word["id"],
+          "quebecois": word["quebecois"],
+          "standard_french": word["standard_french"],
+          "english": word["english"],
+          "pronunciation": word["pronunciation"],
+          "usage_notes": word["usage_notes"],
+          "correct_count": word["correct_count"],
+          "wrong_count": word["wrong_count"]
+        })
+
+      return jsonify({
+        'words': words_data,
+        'total_count': len(words_data)
+      })
+    except Exception as e:
+      return jsonify({"error": str(e)}), 500
 
   @app.route('/groups/<int:id>/study_sessions', methods=['GET'])
   @cross_origin()
