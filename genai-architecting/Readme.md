@@ -5,7 +5,7 @@ This section outlines the fundamental principles guiding system design, includin
 
 ### **Requirements**  
 #### **Business Requirements (Goals & Objectives)**  
-- Provide an **AI-powered, interactive language learning experience** that adapts to students’ progress  
+- Provide an **AI-powered, interactive language learning experience** that adapts to students' progress  
 - Deliver **real-time feedback** on pronunciation, vocabulary, and sentence structure   
 - Ensure **teacher oversight** with analytics on student progress  
 
@@ -121,7 +121,7 @@ There is a demand for a **customized, AI-powered learning platform** that suppor
 - **Teacher Support & Insights:** Generate performance analytics to help educators tailor lesson plans
 
 ### **Aligning with Strategic Goals & Workflows**
-- **Curriculum Integration:** Align AI-generated lessons with the Quebec education system’s learning objectives
+- **Curriculum Integration:** Align AI-generated lessons with the Quebec education system's learning objectives
 - **Sustainable AI Training:** Continuously refine AI models based on feedback from students and educators
 - **Regulatory Compliance:** Maintain adherence to data privacy regulations (Law 25) to protect student information
 - **Efficient Resource Utilization:** Optimize AI infrastructure to balance performance, cost, and sustainability

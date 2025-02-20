@@ -1,8 +1,7 @@
-
 ## Technical Uncertainty
 
 **1.  How well can an AI-Powered Assistant perform a very broad task?** 
-- It is okay, but our research has found that it is best served in executing specific, or very specific, tasks that is narrowly formatted by the designer to ensure it's response/action is consistent and repeatable. 
+- It is okay, but our research has found that it is best served in executing specific, or very specific, tasks that is narrowly formatted by the designer to ensure it's response/action is consistent and repeatable. 
 
 **2. Would a very broad task be better performed by dividing it into subtasks with specialized agents?** 
 - Absolutely, in our research we found it is best to think through (perhaps even with the help of the AI) each of the steps in a particular task or flow or process and dedicate each step as a separate propmpt or action with the specialized agent

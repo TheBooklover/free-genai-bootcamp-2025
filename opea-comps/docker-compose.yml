@@ -1,0 +1,21 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "${LLM_ENDPOINT_PORT:-8008}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ollama_network
+
+volumes:
+  ollama_data:
+
+networks:
+  ollama_network:
+    driver: bridge
