@@ -148,7 +148,6 @@ This is an AI-powered language learning platform specifically designed to teach 
 ## Performance Considerations
 - Pagination for large data sets
 - Efficient JOIN operations
-- Proper indexing
 - Memory usage optimization
 - Caching strategies
 - Rate limiting for API stability

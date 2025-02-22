@@ -26,4 +26,6 @@ curl http://localhost:8008/api/generate -d '{
 }'
 
 
+### Q&A
 
+Q: For the LLM service, which can do text generation, it suggsts it will only work with TGI/vLLM and all you have to do it is have it running. Does TGI and vLLM have a standardized API or is there code to detere which one is running? Do we really have to use a Zeon or Gaudi processor?
